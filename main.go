@@ -46,8 +46,17 @@ func main(){
 func Router(){
 	router := gin.Default()
 	router.POST("/orders", func(ctx *gin.Context) {
+		req := CreateOrderRequest{}
+		if err := ctx.BindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"success" : false,
+
+			})
+			return
+		}
 		ctx.JSON(http.StatusCreated, map[string]interface{}{
 			"success" : true,
+			"order" : req,
 		})
 	})
 
@@ -74,4 +83,16 @@ func Router(){
 	if err := router.Run(); err != nil{
 		panic(err)
 	}
+}
+
+type CreateOrderRequest struct {
+	OrderedAt string `json:"orderedAt"`
+	CustomerName string `json:"custemerName"`
+	Items []ItemOrderRequest `json:"items"`
+}
+
+type ItemOrderRequest struct {
+	ItemCode string `json:"itemCode"`
+	Description string `json:"description"`
+	Quantity int `json:"quantity"`
 }

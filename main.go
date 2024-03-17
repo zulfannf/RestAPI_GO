@@ -67,8 +67,17 @@ func Router(){
 	})
 
 	router.PUT("/orders/:orderId", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusCreated, map[string]interface{}{
+		req := UpdateOrderRequest{}
+		if err := ctx.BindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"success" : false,
+
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, map[string]interface{}{
 			"success" : true,
+			"order" : req,
 		})
 	})
 
@@ -87,11 +96,24 @@ func Router(){
 
 type CreateOrderRequest struct {
 	OrderedAt string `json:"orderedAt"`
-	CustomerName string `json:"custemerName"`
+	CustomerName string `json:"customerName"`
 	Items []ItemOrderRequest `json:"items"`
 }
 
 type ItemOrderRequest struct {
+	ItemCode string `json:"itemCode"`
+	Description string `json:"description"`
+	Quantity int `json:"quantity"`
+}
+
+type UpdateOrderRequest struct {
+	OrderedAt string `json:"orderedAt"`
+	CustomerName string `json:"customerName"`
+	Items []UpdateItemOrderRequest `json:"items"`
+}
+
+type UpdateItemOrderRequest struct {
+	LineItemId int `json:"lineItemId"`
 	ItemCode string `json:"itemCode"`
 	Description string `json:"description"`
 	Quantity int `json:"quantity"`

@@ -1,0 +1,9 @@
+# RestAPI_GO
+## CREATE 
+![Create](images/Create.PNG "Create")
+## Delete
+![Delete](images/Delete.PNG "Delete")
+## List 
+![List](images/list.png "list")
+## Update 
+![Update](images/Update.PNG "Update")

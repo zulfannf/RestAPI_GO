@@ -75,8 +75,19 @@ func Router(db *sql.DB){
 	})
 
 	router.GET("/orders", func(ctx *gin.Context) {
+
+		orders,err := getOrders(db, ctx)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"success" : false,
+				"error" : err.Error(),
+
+			})
+			return
+		}
 		ctx.JSON(http.StatusCreated, map[string]interface{}{
 			"success" : true,
+			"data" : orders,
 		})
 	})
 
@@ -162,10 +173,11 @@ type Item struct{
 }
 
 type Order struct {
-	OrderId int
-	CustomerName string
-	OrderedAt time.Time
+	OrderId int `json:"order_id"`
+	CustomerName string `json:"customer_name"`
+	OrderedAt time.Time `json:"ordered_at"`
 }
+
 
 func createOrderAndItems(db *sql.DB, ctx context.Context,req CreateOrderRequest)(int,error){
 	orderedAt, _ := time.Parse(time.RFC3339,req.OrderedAt)
@@ -249,4 +261,22 @@ func deleteOrder(db *sql.DB, ctx context.Context,orderID int)(error){
 		}
 		
 		return tx.Commit()
+}
+
+func getOrders(db *sql.DB, ctx context.Context)([]Order,error){
+	var orders []Order
+	rows,err := db.QueryContext(ctx, "select order_id, customer_name, ordered_at from orders")
+	if err != nil {
+		return nil,err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var order Order
+		err = rows.Scan(&order.OrderId, &order.CustomerName, &order.OrderedAt)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+	return orders, nil
 }
